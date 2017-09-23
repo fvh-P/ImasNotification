@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Linq;
 
 namespace ImasNotification
 {
@@ -39,6 +40,7 @@ namespace ImasNotification
             {
                 data = (Reminder[])serializer.ReadObject(ms);
             }
+            //return data.Select(x => new Reminder(x.PostTime?.Subtract(new TimeSpan(9,0,0)), x.From, x.Code, x.Post)).ToArray();
             return data;
         }
         public string Serialize()

@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Mastonet;
+using System.Runtime.Serialization;
 
 namespace ImasNotification
 {
@@ -17,13 +18,17 @@ namespace ImasNotification
         [DataMember]
         public string Spoiler { get; set; }
 
-        public PostContent(int? id, string content, bool sensitive, string spoiler)
+        [DataMember]
+        public Visibility Visibility { get; set; }
+
+        public PostContent(int? id, string content, bool sensitive, string spoiler, Visibility v = Visibility.Unlisted)
         {
             
             Id = id;
             Content = content.Length > 500 ? content.Substring(0, 499) : content;
             Sensitive = sensitive;
             Spoiler = spoiler;
+            Visibility = v;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace ImasNotification
         static RemindList remindList = new RemindList();
         static string[] configText = File.ReadAllLines("ImasNotification.config").Select(x => x.TrimEnd(new char[] {'\n', '\r'})).ToArray();
         static DateTime today = DateTime.Today;
+        static int triggerCount = 0;
 
         static readonly string CId = configText[1];
         static readonly string CSec = configText[2];
@@ -48,7 +49,7 @@ namespace ImasNotification
 
             Debug.WriteLine(dailyJobList);
             var timer = new Timer(new TimerCallback(ThreadingTimerCallback));
-            timer.Change(0, 1000 * 30);
+            timer.Change(0, 1000 * 10);
 
             postManager.Col.CollectionChanged += (sender, e) =>
             {
@@ -59,7 +60,7 @@ namespace ImasNotification
                     foreach (var x in item)
                     {
                         postManager.Col.Remove(x);
-                        postManager.Client.PostStatus(x.Content, Visibility.Unlisted, replyStatusId: x.Id, sensitive: x.Sensitive, spoilerText: x.Spoiler);
+                        postManager.Client.PostStatus(x.Content, x.Visibility, replyStatusId: x.Id, sensitive: x.Sensitive, spoilerText: x.Spoiler);
                     }
                     Debug.WriteLine(item[0].Content);
                 }
@@ -79,8 +80,9 @@ namespace ImasNotification
         private static void ThreadingTimerCallback(object state)
         {
             postManager.Client.UpdateCredentials();
-            if (!today.Equals(DateTime.Today))
+            if ((++triggerCount) == 360)
             {
+                triggerCount = 0;
                 today = DateTime.Today;
                 var newJobList = new List<DailyJob>();
                 var files = new DirectoryInfo(configText[0]).GetFiles();
@@ -92,20 +94,21 @@ namespace ImasNotification
                 dailyJobList = newJobList;
             }
             var now = DateTime.Now;
+            var removeList = new List<Reminder>();
             foreach (var remind in remindList)
             {
                 if (remind.PostTime < now)
                 {
                     postManager.Col.Add(remind.Post);
                     remind.Posted = true;
+                    removeList.Add(remind);
                 }
             }
-            var removeList = remindList.Where(x => x.Posted).ToList();
             foreach (var rm in removeList)
             {
                 remindList.Remove(rm);
             }
-            Debug.WriteLine(remindList.Count);
+            Console.WriteLine(remindList.Count);
         }
 
         static async Task RunAsync()
