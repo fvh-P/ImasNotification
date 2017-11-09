@@ -20,34 +20,15 @@ namespace ImasNotification
                     case "remove":
                         RemoveRemind(postManager, from, id, token[2]);
                         return;
-                    case "list":
-                        if (token[2].Length == 4)
-                        {
-                            ShowJobList(postManager, dailyJobList, from, id, token[2], "all");
-                            return;
-                        }
-                        else if(token[2] == "-m" || token[2] == "--my")
-                        {
-                            ShowJobList(postManager, dailyJobList, from, id, null, "my");
-                            return;
-                        }
-                        break;
                 }
 
             }
-            else if (token.Length == 2)
+            else if (token.Length == 2 && token[1] == "help")
             {
-                switch (token[1])
-                {
-                    case "list":
-                        ShowJobList(postManager, dailyJobList, from, id, DateTime.Today.ToString("MMdd"), "all");
-                        return;
-                    case "help":
-                        ShowHelp(postManager, from, id);
-                        return;
-                }
+                ShowHelp(postManager, from, id);
+                return;
             }
-            var content = $"@{from} コマンドが正しくありません。使い方は\"remind help\"を参照してください。\n";
+            var content = $"@{from} コマンドが正しくありません。使い方は\"(at)info help\"または\"(at)info remind help\"を参照してください。\n";
             postManager.Col.Add(new PostContent(id, content, false, null));
         }
 
@@ -106,52 +87,17 @@ namespace ImasNotification
                 postManager.Col.Add(new PostContent(id, content, false, null));
             }
         }
-        private void ShowJobList(PostManager postManager, List<DailyJob> dailyJobList, string from, int id, string date, string option)
-        {
-            var content = $"@{from} ";
-            DateTime d;
-            try
-            {
-                d = DateTime.ParseExact(date, "MMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None);
-            }
-            catch
-            {
-                content += "日付指定の書式が間違っています。\n例:4月1日は0401";
-                postManager.Col.Add(new PostContent(id, content, false, null));
-                return;
-            }
-            DailyJob jobList = dailyJobList.Find(x => x.ShortDate == date);
-            if(jobList.Jobs.Count == 0)
-            {
-                content += $"{DateTime.Now.ToShortTimeString()}現在、{d.ToShortDateString()}のお仕事情報はありません。\n";
-            }
-            else if (option == null)
-            {
-                var tmp = jobList.Jobs.Where(x => x.HasTime == true).ToList();
-                content += $"{d.ToShortDateString()}のお仕事(登録可能のみ)\n" + string.Join("\n", tmp.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }\nお仕事コード:{ x.Code }"));
-            }
-            else if(option == "all")
-            {
-                content += $"{d.ToShortDateString()}のお仕事\n" + string.Join("\n", jobList.Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
-            }
-            else if(option == "my")
-            {
-                content += "現在登録中のお仕事\n" + string.Join("\n", this.Where(x => x.From == from).Select(x => $"{x.Code}"));
-            }
-            postManager.Col.Add(new PostContent(id, content, false, null));
-        }
         private void ShowHelp(PostManager postManager, string from, int id)
         {
             var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードは本日のお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
-                $"オプションリスト\n" +
-                $"remind add <jobcode>\n" +
-                $"  お仕事コード<jobcode>のお仕事を通知登録します。\n" +
-                $"remind remove <jobcode>\n" +
-                $"  お仕事コード<jobcode>のお仕事を通知解除します。\n" +
-                $"remind list <date>\n" +
-                $"  <date>に日付を指定するとその日のお仕事を返します。\n" +
-                $"  日付の書式は4月1日の場合0401です。" +
-                $"  <date>に何も指定しないと本日のお仕事を返します。\n";
+                $"使い方  (at)はアットマーク\n\n" +
+                $"(at)info remind add xxxxxx\n" +
+                $"  お仕事コードxxxxxxのお仕事を通知登録します。\n\n" +
+                $"(at)info remind remove <jobcode>\n" +
+                $"  お仕事コードxxxxxxのお仕事を通知解除します。\n\n" +
+                $"お仕事コードはlistコマンドで調べられます。詳しくは\n" +
+                $"(at)info list help\n" +
+                $"と投稿してください。";
             postManager.Col.Add(new PostContent(id, content, true, "remindコマンドのヘルプ\n"));
         }
     }

@@ -14,7 +14,7 @@ namespace ImasNotification
 {
     class Program
     {
-        static List<DailyJob> dailyJobList;
+        static DailyJobList dailyJobList;
         static RemindList remindList = new RemindList();
         static string[] configText = File.ReadAllLines("ImasNotification.config").Select(x => x.TrimEnd(new char[] {'\n', '\r'})).ToArray();
         static DateTime today = DateTime.Today;
@@ -30,7 +30,7 @@ namespace ImasNotification
             if (dailyJobList == null)
             {
                 today = DateTime.Today;
-                dailyJobList = new List<DailyJob>();
+                dailyJobList = new DailyJobList();
                 var files = new DirectoryInfo(configText[0]).GetFiles();
                 foreach (var f in files)
                 {
@@ -84,7 +84,7 @@ namespace ImasNotification
             {
                 triggerCount = 0;
                 today = DateTime.Today;
-                var newJobList = new List<DailyJob>();
+                var newJobList = new DailyJobList();
                 var files = new DirectoryInfo(configText[0]).GetFiles();
                 foreach (var f in files)
                 {
@@ -132,6 +132,23 @@ namespace ImasNotification
                         {
                             case "remind":
                                 remindList.Remind(postManager, dailyJobList, from, id, token);
+                                break;
+                            case "list":
+                                if (token.Length == 2 && token[1] == "my")
+                                {
+                                    dailyJobList.ShowRegisteredJobList(postManager, remindList, from, id);
+                                }
+                                else {
+                                    dailyJobList.ShowJobList(postManager, from, id, token);
+                                }
+                                break;
+                            case "help":
+                                var content = $"@{from} 現在、infoでは以下のコマンドを実行できます。\n" +
+                                $"各コマンドの詳しい使用法は、\"(at)info コマンド名 help\"と投稿してください。\n\n" +
+                                $"remind : お仕事のリマインダーです。登録すると10分前にリプライでお知らせします。\n\n" +
+                                $"list : 指定した日付のお仕事一覧を表示します。\n\n" +
+                                $"help : ここ。";
+                                postManager.Col.Add(new PostContent(id, content, true, "infoのコマンドヘルプ\n"));
                                 break;
                         }
                     }
