@@ -8,7 +8,7 @@ namespace ImasNotification
     class RemindList : ObservableCollection<Reminder>
     {
         public RemindList() { }
-        public void Remind(PostManager postManager, List<DailyJob> dailyJobList, string from, int id, string[] token)
+        public void Remind(PostManager postManager, List<DailyJob> dailyJobList, string from, long id, string[] token)
         {
             if (token.Length == 3)
             {
@@ -20,8 +20,9 @@ namespace ImasNotification
                     case "remove":
                         RemoveRemind(postManager, from, id, token[2]);
                         return;
+                    default:
+                        break;
                 }
-
             }
             else if (token.Length == 2 && token[1] == "help")
             {
@@ -32,10 +33,10 @@ namespace ImasNotification
             postManager.Col.Add(new PostContent(id, content, false, null));
         }
 
-        private void AddRemind(PostManager postManager, List<DailyJob> dailyJobList, string from, int id, string code)
+        private void AddRemind(PostManager postManager, List<DailyJob> dailyJobList, string from, long id, string code)
         {
             string content;
-            foreach (var job in dailyJobList.SelectMany(x => x.Jobs).ToList())
+            foreach (var job in dailyJobList.SelectMany(x => x.Jobs))
             {
                 if (job.Code == code && job.HasTime == true)
                 {
@@ -72,7 +73,7 @@ namespace ImasNotification
             content = $"@{from} お仕事コード{code}に該当するお仕事はありません。\n";
             postManager.Col.Add(new PostContent(id, content, false, null));
         }
-        private void RemoveRemind(PostManager postManager, string from, int id, string code)
+        private void RemoveRemind(PostManager postManager, string from, long id, string code)
         {
             string content;
             if (this.Count(x => x.From == from && x.Code == code) == 0)
@@ -82,12 +83,12 @@ namespace ImasNotification
             }
             else
             {
-                Remove(this.Where(x => x.From != from || x.Code != code).First());
+                Remove(this.Where(x => x.From == from && x.Code == code).First());
                 content = $"@{from} お仕事コード{code}の通知登録を解除しました。\n";
                 postManager.Col.Add(new PostContent(id, content, false, null));
             }
         }
-        private void ShowHelp(PostManager postManager, string from, int id)
+        private void ShowHelp(PostManager postManager, string from, long id)
         {
             var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードは本日のお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
                 $"使い方  (at)はアットマーク\n\n" +

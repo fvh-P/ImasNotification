@@ -7,7 +7,7 @@ namespace ImasNotification
     class PostContent
     {
         [DataMember]
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         [DataMember]
         public string Content { get; set; }
@@ -21,9 +21,8 @@ namespace ImasNotification
         [DataMember]
         public Visibility Visibility { get; set; }
 
-        public PostContent(int? id, string content, bool sensitive, string spoiler, Visibility v = Visibility.Unlisted)
+        public PostContent(long? id, string content, bool sensitive, string spoiler, Visibility v = Visibility.Unlisted)
         {
-            
             Id = id;
             Content = content.Length > 500 ? content.Substring(0, 499) : content;
             Sensitive = sensitive;

@@ -9,7 +9,7 @@ namespace ImasNotification
         public DailyJobList() : base() { }
         public DailyJobList(int capacity): base(capacity) { }
 
-        public void ShowJobList(PostManager pm, string from, int id, string[] token, RemindList rl = null)
+        public void ShowJobList(PostManager pm, string from, long id, string[] token, RemindList rl = null)
         {
             var content = $"@{from} ";
             DateTime d;
@@ -22,14 +22,13 @@ namespace ImasNotification
             else if(token.Length >= 2 && DateTime.TryParseExact(token[1], "MMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None, out var _))
             {
                 d = DateTime.ParseExact(token[1], "MMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None);
-                DailyJob jobList = Find(x => x.ShortDate == token[1]);
-                if (jobList.Jobs.Count == 0)
+                if (Find(x => x.ShortDate == token[1]).Jobs.Count == 0)
                 {
                     content += $"{DateTime.Now.ToShortTimeString()}現在、{d.ToShortDateString()}のお仕事情報はありません。\n";
                 }
                 else
                 {
-                    content += $"{d.ToShortDateString()}のお仕事\n" + string.Join("\n", jobList.Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
+                    content += $"{d.ToShortDateString()}のお仕事\n" + string.Join("\n", Find(x => x.ShortDate == token[1]).Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
                 }
             }
             else if(token.Length >= 2 && token[1] == "help")
@@ -48,11 +47,11 @@ namespace ImasNotification
             pm.Col.Add(new PostContent(id, content, false, null));
         }
 
-        public void ShowRegisteredJobList(PostManager pm, RemindList rl, string from, int id)
+        public void ShowRegisteredJobList(PostManager pm, RemindList rl, string from, long id)
         {
             var content = $"@{from} ";
             var str = string.Join("\n", rl.Where(x => x.From == from).Select(x => $"{x.Code}"));
-            content += "現在登録中のお仕事" + ((str == "") ? "はありません。" : $"\n{string.Join("\n", rl.Where(x => x.From == from).Select(x => $"{x.Code}"))}");
+            content += $"現在登録中のお仕事{((str == "") ? "はありません。" : $"\n{string.Join("\n", rl.Where(x => x.From == from).Select(x => $"{x.Code}"))}")}";
             pm.Col.Add(new PostContent(id, content, false, null));
         }
     }

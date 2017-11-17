@@ -4,6 +4,7 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ImasNotification
 {
@@ -32,16 +33,13 @@ namespace ImasNotification
             Post = pc;
             Posted = false;
         }
-        public static Reminder[] Deserialize(string jsontext)
+        public static IEnumerable<Reminder> Deserialize(string jsontext)
         {
-            Reminder[] data;
-            var serializer = new DataContractJsonSerializer(typeof(Reminder[]));
+            var serializer = new DataContractJsonSerializer(typeof(IEnumerable<Reminder>));
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(jsontext)))
             {
-                data = (Reminder[])serializer.ReadObject(ms);
+                return (IEnumerable<Reminder>)serializer.ReadObject(ms);
             }
-            //return data.Select(x => new Reminder(x.PostTime?.Subtract(new TimeSpan(9,0,0)), x.From, x.Code, x.Post)).ToArray();
-            return data;
         }
         public string Serialize()
         {

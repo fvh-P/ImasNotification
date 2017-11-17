@@ -40,8 +40,7 @@ namespace ImasNotification
             }
             if (File.Exists("remindList.json"))
             {
-                var tmp = Reminder.Deserialize(File.ReadAllText("remindList.json"));
-                foreach(var r in tmp)
+                foreach (var r in Reminder.Deserialize(File.ReadAllText("remindList.json")))
                 {
                     remindList.Add(r);
                 }
@@ -62,13 +61,13 @@ namespace ImasNotification
                         postManager.Col.Remove(x);
                         postManager.Client.PostStatus(x.Content, x.Visibility, replyStatusId: x.Id, sensitive: x.Sensitive, spoilerText: x.Spoiler);
                     }
-                    Debug.WriteLine(item[0].Content);
+                    Debug.WriteLine(item.First().Content);
                 }
             };
 
             remindList.CollectionChanged += (sender, e) =>
             {
-                var jsonString = string.Join(",\n", remindList.Select(x => x.Serialize()).ToArray());
+                var jsonString = string.Join(",\n", remindList.Select(x => x.Serialize()));
                 File.WriteAllText("remindList.json", $"[{jsonString}]");
             };
 
@@ -88,8 +87,7 @@ namespace ImasNotification
                 var files = new DirectoryInfo(configText[0]).GetFiles();
                 foreach (var f in files)
                 {
-                    var tmp = File.ReadAllText(f.FullName);
-                    newJobList.Add(DailyJob.Deserialize(tmp));
+                    newJobList.Add(DailyJob.Deserialize(File.ReadAllText(f.FullName)));
                 }
                 dailyJobList = newJobList;
             }
@@ -113,8 +111,7 @@ namespace ImasNotification
 
         static async Task RunAsync()
         {
-            var streamingClient = new Manager("imastodon.net", CId, CSec, Token);
-            var stream = streamingClient.Client.GetUserStreaming();
+            var stream = new Manager("imastodon.net", CId, CSec, Token).Client.GetUserStreaming();
             stream.OnNotification += (sender, e) =>
             {
                 if (e.Notification.Type == "mention" && e.Notification.Status.Mentions.Count() == 1)
@@ -138,7 +135,8 @@ namespace ImasNotification
                                 {
                                     dailyJobList.ShowRegisteredJobList(postManager, remindList, from, id);
                                 }
-                                else {
+                                else
+                                {
                                     dailyJobList.ShowJobList(postManager, from, id, token);
                                 }
                                 break;
@@ -149,6 +147,8 @@ namespace ImasNotification
                                 $"list : 指定した日付のお仕事一覧を表示します。\n\n" +
                                 $"help : ここ。";
                                 postManager.Col.Add(new PostContent(id, content, true, "infoのコマンドヘルプ\n"));
+                                break;
+                            default:
                                 break;
                         }
                     }
