@@ -21,7 +21,7 @@ namespace ImasNotification
 
         public DateTime Date => DateTime.ParseExact(DateString, "yyyy-MM-dd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None);
 
-        public string ShortDate => Date.ToString("MMdd");
+        public string ShortDate => Date.ToString("yyMMdd");
 
         public static DailyJob Deserialize(string jsontext)
         {

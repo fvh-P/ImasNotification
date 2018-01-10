@@ -8,6 +8,7 @@ namespace ImasNotification
     class RemindList : ObservableCollection<Reminder>
     {
         public RemindList() { }
+        public RemindList(IEnumerable<Reminder> collection) : base(collection) { } 
         public void Remind(PostManager postManager, List<DailyJob> dailyJobList, string from, long id, string[] token)
         {
             if (token.Length == 3)

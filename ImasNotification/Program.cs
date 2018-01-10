@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Mastonet;
 using HtmlAgilityPack;
+using System.Collections.ObjectModel;
 
 namespace ImasNotification
 {
@@ -40,10 +41,7 @@ namespace ImasNotification
             }
             if (File.Exists("remindList.json"))
             {
-                foreach (var r in Reminder.Deserialize(File.ReadAllText("remindList.json")))
-                {
-                    remindList.Add(r);
-                }
+                remindList = new RemindList(Reminder.Deserialize(File.ReadAllText("remindList.json")));
             }
 
             Debug.WriteLine(dailyJobList);
@@ -59,6 +57,7 @@ namespace ImasNotification
                     foreach (var x in item)
                     {
                         postManager.Col.Remove(x);
+                        Console.WriteLine(x.Content);
                         postManager.Client.PostStatus(x.Content, x.Visibility, replyStatusId: x.Id, sensitive: x.Sensitive, spoilerText: x.Spoiler);
                     }
                     Debug.WriteLine(item.First().Content);

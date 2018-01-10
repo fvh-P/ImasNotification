@@ -16,19 +16,18 @@ namespace ImasNotification
             if(token.Length == 1)
             {
                 d = DateTime.Today;
-                DailyJob jobList = Find(x => x.ShortDate == d.ToString("MMdd"));
-                content += $"{d.ToShortDateString()}のお仕事\n" + string.Join("\n", jobList.Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
+                DailyJob jobList = Find(x => x.ShortDate == d.ToString("yyMMdd"));
+                content += $"{d.ToString("yyyy/MM/dd")}のお仕事\n" + string.Join("\n", jobList.Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
             }
-            else if(token.Length >= 2 && DateTime.TryParseExact(token[1], "MMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None, out var _))
+            else if(token.Length >= 2 && DateTime.TryParseExact(token[1], "yyMMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None, out d))
             {
-                d = DateTime.ParseExact(token[1], "MMdd", System.Globalization.DateTimeFormatInfo.InvariantInfo, System.Globalization.DateTimeStyles.None);
                 if (Find(x => x.ShortDate == token[1]).Jobs.Count == 0)
                 {
-                    content += $"{DateTime.Now.ToShortTimeString()}現在、{d.ToShortDateString()}のお仕事情報はありません。\n";
+                    content += $"{DateTime.Now.ToShortTimeString()}現在、{d.ToString("yyyy/MM/dd")}のお仕事情報はありません。\n";
                 }
                 else
                 {
-                    content += $"{d.ToShortDateString()}のお仕事\n" + string.Join("\n", Find(x => x.ShortDate == token[1]).Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
+                    content += $"{d.ToString("yyyy/MM/dd")}のお仕事\n" + string.Join("\n", Find(x => x.ShortDate == token[1]).Jobs.Select(x => $"[{ x.Team }] { x.ReallyTime }\n{ x.Item }\n{ x.Url }" + (x.HasTime == true ? $"\nお仕事コード:{ x.Code }" : "")));
                 }
             }
             else if(token.Length >= 2 && token[1] == "help")
@@ -38,11 +37,17 @@ namespace ImasNotification
                     $"(at)info list\n" +
                     $"  日付を指定しないと今日のお仕事一覧を返します。\n\n" +
                     $"(at)info list MMdd\n" +
-                    $"  MMddの形式で指定された日付のお仕事一覧を返します。\n" +
-                    $"  4月1日は0401です。\n" +
+                    $"  yyMMddの形式で指定された日付のお仕事一覧を返します。\n" +
+                    $"  2018年4月1日なら180401です。\n" +
                     $"  指定できる日付は翌月末までです。";
                 pm.Col.Add(new PostContent(id, content, true, "listコマンドのヘルプ\n"));
                 return;
+            }
+            else
+            {
+                content += $"コマンドが正しくないようです。日付が正しくないなどの理由が考えられます。\n" +
+                    $"指定できる日付はyyMMddの形式で、翌月末までです。\n" +
+                    $" 2018年4月1日なら180401です。\n";
             }
             pm.Col.Add(new PostContent(id, content, false, null));
         }
