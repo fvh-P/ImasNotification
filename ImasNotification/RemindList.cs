@@ -91,11 +91,11 @@ namespace ImasNotification
         }
         private void ShowHelp(PostManager postManager, string from, long id)
         {
-            var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードは本日のお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
+            var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードはお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
                 $"使い方  (at)はアットマーク\n\n" +
                 $"(at)info remind add xxxxxx\n" +
                 $"  お仕事コードxxxxxxのお仕事を通知登録します。\n\n" +
-                $"(at)info remind remove <jobcode>\n" +
+                $"(at)info remind remove xxxxxx\n" +
                 $"  お仕事コードxxxxxxのお仕事を通知解除します。\n\n" +
                 $"お仕事コードはlistコマンドで調べられます。詳しくは\n" +
                 $"(at)info list help\n" +
