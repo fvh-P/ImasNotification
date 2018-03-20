@@ -13,10 +13,70 @@ using System.Collections.ObjectModel;
 
 namespace ImasNotification
 {
+    class FeedList : List<long>
+    {
+        public FeedList() : base() { }
+        public FeedList(int capacity) : base(capacity) { }
+
+        public void Subscribe(PostManager pm, string from, long id, long accountId, Visibility v)
+        {
+            var content = $"@{from} ";
+            if (Contains(accountId))
+            {
+                content += $"すでに購読済みです。\n";
+            }
+            else
+            {
+                Add(accountId);
+                if (File.Exists("feedList.json"))
+                {
+                    File.Delete("feedList.json");
+                }
+                File.WriteAllLines("feedList.json", this.Select(x => x.ToString()));
+                content += $"購読登録しました。\n" +
+                    $"アイマスニュースおよびアイマス公式ブログ更新情報をDMで配信します。" +
+                    $"解除する場合はinfo宛にfeed removeとリプライしてください。";
+            }
+            pm.Col.Add(new PostContent(id, content, false, null, v: v));
+        }
+
+        public void UnSubscribe(PostManager pm, string from, long id, long accountId, Visibility v)
+        {
+            var content = $"@{from} ";
+            if (Contains(accountId))
+            {
+                Remove(accountId);
+                if (File.Exists("feedList.json"))
+                {
+                    File.Delete("feedList.json");
+                }
+                File.WriteAllLines("feedList.json", this.Select(x => x.ToString()));
+                content += $"購読解除しました。\n";
+            }
+            else
+            {
+                content += $"購読していません。\n";
+            }
+            pm.Col.Add(new PostContent(id, content, false, null, v: v));
+        }
+
+        public void ShowHelp(PostManager pm, string from, long id, Visibility v)
+        {
+            var content = $"feedコマンド アイマスニュースとアイマス公式ブログの更新情報をDMでお知らせします。\n" +
+                    $"使い方  (at)はアットマーク\n\n" +
+                    $"(at)info feed add\n" +
+                    $"  購読します。以降更新情報があるとDMで送られてきます。\n\n" +
+                    $"(at)info feed remove\n" +
+                    $"  購読を解除します\n";
+            pm.Col.Add(new PostContent(id, content, true, "feedコマンドのヘルプ\n", v: v));
+            return;
+        }
+    }
     class Program
     {
         static DailyJobList dailyJobList;
         static RemindList remindList = new RemindList();
+        static FeedList feedList = new FeedList();
         static string[] configText = File.ReadAllLines("ImasNotification.config").Select(x => x.TrimEnd(new char[] {'\n', '\r'})).ToArray();
         static DateTime today = DateTime.Today;
         static int triggerCount = 0;
@@ -25,6 +85,7 @@ namespace ImasNotification
         static readonly string CSec = configText[2];
         static readonly string Token = configText[3];
         static PostManager postManager = new PostManager("imastodon.net", CId, CSec, Token);
+
         static void Main(string[] args)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -43,8 +104,10 @@ namespace ImasNotification
             {
                 remindList = new RemindList(Reminder.Deserialize(File.ReadAllText("remindList.json")));
             }
-
-            Debug.WriteLine(dailyJobList);
+            if (File.Exists("feedList.json"))
+            {
+                feedList.AddRange(File.ReadLines("feedList.json").Select(x => long.Parse(x)).ToList());
+            }
             var timer = new Timer(new TimerCallback(ThreadingTimerCallback));
             timer.Change(0, 1000 * 10);
 
@@ -72,7 +135,6 @@ namespace ImasNotification
 
             var task = RunAsync();
             task.Wait();
-
         }
 
         private static void ThreadingTimerCallback(object state)
@@ -115,6 +177,7 @@ namespace ImasNotification
             {
                 if (e.Notification.Type == "mention" && e.Notification.Status.Mentions.Count() == 1)
                 {
+                    var v = e.Notification.Status.Visibility;
                     var my = e.Notification.Status.Mentions.First().AccountName;
                     var from = e.Notification.Account.AccountName;
                     var id = e.Notification.Status.Id;
@@ -127,21 +190,37 @@ namespace ImasNotification
                         switch (token[0])
                         {
                             case "remind":
-                                remindList.Remind(postManager, dailyJobList, from, id, token);
+                                remindList.Remind(postManager, dailyJobList, from, id, v, token);
                                 break;
                             case "list":
                                 if (token.Length == 2 && token[1] == "my")
                                 {
-                                    dailyJobList.ShowRegisteredJobList(postManager, remindList, from, id);
+                                    dailyJobList.ShowRegisteredJobList(postManager, remindList, from, id, v);
                                 }
                                 else
                                 {
-                                    dailyJobList.ShowJobList(postManager, from, id, token);
+                                    dailyJobList.ShowJobList(postManager, from, id, v, token);
+                                }
+                                break;
+                            case "feed":
+                                var accountId = e.Notification.Account.Id;
+                                if (token.Length == 2 && token[1] == "add")
+                                {
+                                    feedList.Subscribe(postManager, from, id, accountId, v);
+                                }
+                                else if (token.Length == 2 && token[1] == "remove")
+                                {
+                                    feedList.UnSubscribe(postManager, from, id, accountId, v);
+                                }
+                                else
+                                {
+                                    feedList.ShowHelp(postManager, from, id, v);
                                 }
                                 break;
                             case "help":
                                 var content = $"@{from} 現在、infoでは以下のコマンドを実行できます。\n" +
                                 $"各コマンドの詳しい使用法は、\"(at)info コマンド名 help\"と投稿してください。\n\n" +
+                                $"feed : アイマスニュースとアイマス公式ブログの更新情報をDMでお知らせします。\n\n" +
                                 $"remind : お仕事のリマインダーです。登録すると10分前にリプライでお知らせします。\n\n" +
                                 $"list : 指定した日付のお仕事一覧を表示します。\n\n" +
                                 $"help : ここ。";

@@ -27,7 +27,7 @@ namespace ImasNotification
             Content = content.Length > 500 ? content.Substring(0, 499) : content;
             Sensitive = sensitive;
             Spoiler = spoiler;
-            Visibility = v;
+            Visibility = v > Visibility.Unlisted ? v : Visibility.Unlisted;
         }
     }
 }
