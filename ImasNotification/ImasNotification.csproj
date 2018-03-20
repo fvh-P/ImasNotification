@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="DailyJob.cs" />
     <Compile Include="DailyJobList.cs" />
+    <Compile Include="FeedList.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="PostContent.cs" />
