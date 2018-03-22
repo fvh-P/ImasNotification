@@ -17,6 +17,13 @@ namespace ImasNotification
             {
                 content += $"すでに購読済みです。\n";
             }
+            else if (Count > 50)
+            {
+                content += $"購読できません。\n" +
+                    $"現在、購読人数が上限に達しています。\n" +
+                    $"詳しくは(at)fまでお問い合わせください。\n\n" +
+                    $"※(at)はアットマーク";
+            }
             else
             {
                 Add(accountId);
@@ -26,7 +33,7 @@ namespace ImasNotification
                 }
                 File.WriteAllLines("feedList.json", this.Select(x => x.ToString()));
                 content += $"購読登録しました。\n" +
-                    $"アイマスニュースおよびアイマス公式ブログ更新情報をDMで配信します。" +
+                    $"アイマスニュースおよびアイマス公式ブログ更新情報をDMで配信します。\n" +
                     $"解除する場合はinfo宛にfeed removeとリプライしてください。";
             }
             pm.Col.Add(new PostContent(id, content, false, null, v: v));
