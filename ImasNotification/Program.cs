@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
-using System.Collections.ObjectModel;
 
 namespace ImasNotification
 {
@@ -121,6 +120,7 @@ namespace ImasNotification
                     var my = e.Notification.Status.Mentions.First().AccountName;
                     var from = e.Notification.Account.AccountName;
                     var id = e.Notification.Status.Id;
+                    var account = e.Notification.Status.Account.Id;
                     Debug.WriteLine($"{from}: {e.Notification.Status.Content}");
                     var toot = HtmlParse(e.Notification.Status.Content).Replace($"@{my}", "").TrimStart();
 
@@ -165,6 +165,13 @@ namespace ImasNotification
                                 $"list : 指定した日付のお仕事一覧を表示します。\n\n" +
                                 $"help : ここ。";
                                 postManager.Col.Add(new PostContent(id, content, true, "infoのコマンドヘルプ\n"));
+                                break;
+                            case "admin":
+                                
+                                if (account == 35)
+                                {
+                                    AdminCommand.AdminCommander(postManager, from, id, v, token);
+                                }
                                 break;
                             default:
                                 break;
