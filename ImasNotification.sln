@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImasNotification", "ImasNotification\ImasNotification.csproj", "{10A15E52-0E4D-401A-906E-267585AF2284}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImasNotification", "ImasNotification\ImasNotification.csproj", "{28DD0C9A-91E8-49AB-8F8F-2AA7E9AC750B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{10A15E52-0E4D-401A-906E-267585AF2284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10A15E52-0E4D-401A-906E-267585AF2284}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10A15E52-0E4D-401A-906E-267585AF2284}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10A15E52-0E4D-401A-906E-267585AF2284}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28DD0C9A-91E8-49AB-8F8F-2AA7E9AC750B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28DD0C9A-91E8-49AB-8F8F-2AA7E9AC750B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28DD0C9A-91E8-49AB-8F8F-2AA7E9AC750B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28DD0C9A-91E8-49AB-8F8F-2AA7E9AC750B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D2C1F91A-1021-4C8B-9812-7BDF33552C93}
 	EndGlobalSection
 EndGlobal

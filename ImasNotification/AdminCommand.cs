@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Management.Automation;
+﻿using System.Diagnostics;
 using Mastonet;
 
 namespace ImasNotification
@@ -31,25 +30,17 @@ namespace ImasNotification
         }
         private static bool FetchNewBlogItem()
         {
-            var source = $"ruby ../ImasInfo/ImasInfo.rb\n$LASTEXITCODE\n";
-            PSObject result = null;
-            using (var invoker = new RunspaceInvoke())
-            {
-                result = invoker.Invoke(source).Last();
-            }
-            var exitcode = result.BaseObject as int?;
-            return exitcode == 0 ? true : false;
+            var process = new ProcessStartInfo("ruby", "../ImasInfo/ImasInfo.rb");
+            var p = Process.Start(process);
+            p.WaitForExit();
+            return p.ExitCode == 0 ? true : false;
         }
         private static bool FetchNewNewsItem()
         {
-            var source = $"ruby ../ImasNews/ImasNews.rb\n$LASTEXITCODE\n";
-            PSObject result = null;
-            using (var invoker = new RunspaceInvoke())
-            {
-                result = invoker.Invoke(source).Last();
-            }
-            var exitcode = result.BaseObject as int?;
-            return exitcode == 0 ? true : false;
+            var process = new ProcessStartInfo("ruby", "../ImasNews/ImasNews.rb");
+            var p = Process.Start(process);
+            p.WaitForExit();
+            return p.ExitCode == 0 ? true : false;
         }
     }
 }
