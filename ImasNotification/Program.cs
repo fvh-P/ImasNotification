@@ -84,10 +84,10 @@ namespace ImasNotification
                 triggerCount = 0;
                 today = DateTime.Today;
                 var newJobList = new DailyJobList();
-                var files = new DirectoryInfo(configText[0]).GetFiles();
-                foreach (var f in files)
+                //var files = new DirectoryInfo(configText[0]).GetFiles();
+                foreach (var f in Directory.EnumerateFiles(configText[0]))
                 {
-                    newJobList.Add(DailyJob.Deserialize(File.ReadAllText(f.FullName)));
+                    newJobList.Add(DailyJob.Deserialize(File.ReadAllText(f)));
                 }
                 dailyJobList = newJobList;
             }
@@ -105,8 +105,8 @@ namespace ImasNotification
             foreach (var rm in removeList)
             {
                 remindList.Remove(rm);
+                Console.WriteLine(remindList.Count);
             }
-            Console.WriteLine(remindList.Count);
         }
 
         static async Task RunAsync()

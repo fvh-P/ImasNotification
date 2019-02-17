@@ -18,9 +18,11 @@ namespace ImasNotification
                 {
                     case "add":
                         AddRemind(postManager, dailyJobList, from, id, v, token[2]);
+                        Console.WriteLine(Count);
                         return;
                     case "remove":
                         RemoveRemind(postManager, from, id, v, token[2]);
+                        Console.WriteLine(Count);
                         return;
                     default:
                         break;
