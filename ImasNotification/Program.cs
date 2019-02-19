@@ -32,10 +32,10 @@ namespace ImasNotification
             {
                 today = DateTime.Today;
                 dailyJobList = new DailyJobList();
-                var files = new DirectoryInfo(configText[0]).GetFiles();
-                foreach (var f in files)
+                //var files = new DirectoryInfo(configText[0]).GetFiles();
+                foreach (var f in Directory.EnumerateFiles(configText[0]))
                 {
-                    var tmp = File.ReadAllText(f.FullName);
+                    var tmp = File.ReadAllText(f);
                     dailyJobList.Add(DailyJob.Deserialize(tmp));
                 }
             }
@@ -87,9 +87,11 @@ namespace ImasNotification
                 //var files = new DirectoryInfo(configText[0]).GetFiles();
                 foreach (var f in Directory.EnumerateFiles(configText[0]))
                 {
+                    Console.WriteLine(f);
                     newJobList.Add(DailyJob.Deserialize(File.ReadAllText(f)));
                 }
                 dailyJobList = newJobList;
+                GC.Collect();
             }
             var now = DateTime.Now;
             var removeList = new List<Reminder>();
@@ -187,9 +189,8 @@ namespace ImasNotification
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(DateTime.Now);
-                    Console.WriteLine(remindList.Count);
-                    Debug.WriteLine(e.Message);
+                    Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
+                    Console.WriteLine(e.Message);
                 }
             }
         }
