@@ -87,7 +87,6 @@ namespace ImasNotification
                 //var files = new DirectoryInfo(configText[0]).GetFiles();
                 foreach (var f in Directory.EnumerateFiles(configText[0]))
                 {
-                    Console.WriteLine(f);
                     newJobList.Add(DailyJob.Deserialize(File.ReadAllText(f)));
                 }
                 dailyJobList = newJobList;
