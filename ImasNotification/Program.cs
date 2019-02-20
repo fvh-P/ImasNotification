@@ -145,18 +145,7 @@ namespace ImasNotification
                                 break;
                             case "feed":
                                 var accountId = e.Notification.Account.Id;
-                                if (token.Length == 2 && token[1] == "add")
-                                {
-                                    feedList.Subscribe(postManager, from, id, accountId, v);
-                                }
-                                else if (token.Length == 2 && token[1] == "remove")
-                                {
-                                    feedList.UnSubscribe(postManager, from, id, accountId, v);
-                                }
-                                else
-                                {
-                                    feedList.ShowHelp(postManager, from, id, v);
-                                }
+                                feedList.Feed(postManager, from, id, accountId, v, token);
                                 break;
                             case "help":
                                 var content = $"@{from} 現在、infoでは以下のコマンドを実行できます。\n" +

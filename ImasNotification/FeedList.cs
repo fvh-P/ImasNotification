@@ -9,8 +9,31 @@ namespace ImasNotification
     {
         public FeedList() : base() { }
         public FeedList(int capacity) : base(capacity) { }
-
-        public void Subscribe(PostManager pm, string from, long id, long accountId, Visibility v)
+        public void Feed(PostManager postManager, string from, long id, long accountId, Visibility v, string[] token)
+        {
+            PostContent pc = null;
+            switch (token[1])
+            {
+                case "add":
+                    pc = Subscribe(from, id, accountId, v);
+                    break;
+                case "remove":
+                    pc = UnSubscribe(from, id, accountId, v);
+                    break;
+                case "help":
+                    pc = ShowHelp(from, id, v);
+                    break;
+                default:
+                    var content = $"@{from} コマンドが正しくありません。使い方は\"(at)info help\"または\"(at)info feed help\"を参照してください。\n";
+                    pc = new PostContent(id, content, false, null, v: v);
+                    break;
+            }
+            if (pc != null)
+            {
+                postManager.Col.Add(pc);
+            }
+        }
+        public PostContent Subscribe(string from, long id, long accountId, Visibility v)
         {
             var content = $"@{from} ";
             if (Contains(accountId))
@@ -36,10 +59,10 @@ namespace ImasNotification
                     $"アイマスニュースおよびアイマス公式ブログ更新情報をDMで配信します。\n" +
                     $"解除する場合はinfo宛にfeed removeとリプライしてください。";
             }
-            pm.Col.Add(new PostContent(id, content, false, null, v: v));
+            return new PostContent(id, content, false, null, v: v);
         }
 
-        public void UnSubscribe(PostManager pm, string from, long id, long accountId, Visibility v)
+        public PostContent UnSubscribe(string from, long id, long accountId, Visibility v)
         {
             var content = $"@{from} ";
             if (Contains(accountId))
@@ -56,10 +79,10 @@ namespace ImasNotification
             {
                 content += $"購読していません。\n";
             }
-            pm.Col.Add(new PostContent(id, content, false, null, v: v));
+            return new PostContent(id, content, false, null, v: v);
         }
 
-        public void ShowHelp(PostManager pm, string from, long id, Visibility v)
+        public PostContent ShowHelp(string from, long id, Visibility v)
         {
             var content = $"feedコマンド アイマスニュースとアイマス公式ブログの更新情報をDMでお知らせします。\n" +
                     $"使い方  (at)はアットマーク\n\n" +
@@ -67,8 +90,7 @@ namespace ImasNotification
                     $"  購読します。以降更新情報があるとDMで送られてきます。\n\n" +
                     $"(at)info feed remove\n" +
                     $"  購読を解除します\n";
-            pm.Col.Add(new PostContent(id, content, true, "feedコマンドのヘルプ\n", v: v));
-            return;
+            return new PostContent(id, content, true, "feedコマンドのヘルプ\n", v: v);
         }
     }
 }
