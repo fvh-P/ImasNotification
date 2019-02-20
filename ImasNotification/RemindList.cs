@@ -12,32 +12,32 @@ namespace ImasNotification
         public RemindList(IEnumerable<Reminder> collection) : base(collection) { } 
         public void Remind(PostManager postManager, List<DailyJob> dailyJobList, string from, long id, Visibility v, string[] token)
         {
-            if (token.Length == 3)
+            PostContent pc = null;
+            switch (token[1])
             {
-                switch (token[1])
-                {
-                    case "add":
-                        AddRemind(postManager, dailyJobList, from, id, v, token[2]);
-                        Console.WriteLine(Count);
-                        return;
-                    case "remove":
-                        RemoveRemind(postManager, from, id, v, token[2]);
-                        Console.WriteLine(Count);
-                        return;
-                    default:
-                        break;
-                }
+                case "add":
+                    pc = AddRemind(dailyJobList, from, id, v, token[2]);
+                    Console.WriteLine(Count);
+                    break;
+                case "remove":
+                    pc = RemoveRemind(from, id, v, token[2]);
+                    Console.WriteLine(Count);
+                    break;
+                case "help":
+                    pc = ShowHelp(from, id, v);
+                    break;
+                default:
+                    var content = $"@{from} コマンドが正しくありません。使い方は\"(at)info help\"または\"(at)info remind help\"を参照してください。\n";
+                    pc = new PostContent(id, content, false, null, v: v);
+                    break;
             }
-            else if (token.Length == 2 && token[1] == "help")
+            if (pc != null)
             {
-                ShowHelp(postManager, from, id, v);
-                return;
+                postManager.Col.Add(pc);
             }
-            var content = $"@{from} コマンドが正しくありません。使い方は\"(at)info help\"または\"(at)info remind help\"を参照してください。\n";
-            postManager.Col.Add(new PostContent(id, content, false, null, v: v));
         }
 
-        private void AddRemind(PostManager postManager, List<DailyJob> dailyJobList, string from, long id, Visibility v, string code)
+        private PostContent AddRemind(List<DailyJob> dailyJobList, string from, long id, Visibility v, string code)
         {
             string content = $"@{from} ";
             foreach (var job in dailyJobList.SelectMany(x => x.Jobs))
@@ -46,18 +46,16 @@ namespace ImasNotification
                 {
                     if (job.Time - new TimeSpan(0, 10, 0) < DateTime.Now && DateTime.Now < job.Time)
                     {
-                        content += $"さん、そのお仕事はもうすぐです。\n{job.Time.ToShortTimeString()}\n{job.Item}\n{job.Url}\n";
-                        postManager.Col.Add(new PostContent(id, content, false, null, v: v));
-                        return;
+                        content += $"さん、そのお仕事はもうすぐです。\n{job.Time.ToString("HH:mm")}\n{job.Item}\n{job.Url}\n";
+                        return new PostContent(id, content, false, null, v: v);
                     }
                     else if(job.Time < DateTime.Now)
                     {
-                        content += $"さん、そのお仕事は時間を過ぎています。\n{job.Time.ToShortTimeString()}\n{job.Item}\n{job.Url}\n";
-                        postManager.Col.Add(new PostContent(id, content, false, null, v: v));
-                        return;
+                        content += $"さん、そのお仕事は時間を過ぎています。\n{job.Time.ToString("HH:mm")}\n{job.Item}\n{job.Url}\n";
+                        return new PostContent(id, content, false, null, v: v);
                     }
 
-                    content += $"さん、もうすぐお仕事です。\n{job.Time.ToShortTimeString()}\n{job.Item}\n{job.Url}\n";
+                    content += $"さん、もうすぐお仕事です。\n{job.Time.ToString("HH:mm")}\n{job.Item}\n{job.Url}\n";
                     var tmp = new Reminder(job.Time - new TimeSpan(0, 10, 0), from, code, new PostContent(id, content, false, null, v: v));
 
                     if (this.Count(x => x.Post.Content == content) != 0)
@@ -67,16 +65,15 @@ namespace ImasNotification
                     else
                     {
                         Add(tmp);
-                        content = $"@{from} \n{job.Time.ToShortDateString()} {job.Time.ToShortTimeString()}\n{job.Item}\n登録しました。約10分前にお知らせします。\n";
+                        content = $"@{from} \n{job.Time.ToString("yy/MM/dd HH:mm")}\n{job.Item}\n登録しました。約10分前にお知らせします。\n";
                     }
-                    postManager.Col.Add(new PostContent(id, content, false, null, v: v));
-                    return;
+                    return new PostContent(id, content, false, null, v: v);
                 }
             }
             content += $"お仕事コード{code}に該当するお仕事はありません。\n";
-            postManager.Col.Add(new PostContent(id, content, false, null, v: v));
+            return new PostContent(id, content, false, null, v: v);
         }
-        private void RemoveRemind(PostManager postManager, string from, long id, Visibility v, string code)
+        private PostContent RemoveRemind(string from, long id, Visibility v, string code)
         {
             string content = $"@{from} ";
             if (this.Count(x => x.From == from && x.Code == code) == 0)
@@ -88,9 +85,9 @@ namespace ImasNotification
                 Remove(this.Where(x => x.From == from && x.Code == code).First());
                 content += $"お仕事コード{code}の通知登録を解除しました。\n";
             }
-            postManager.Col.Add(new PostContent(id, content, false, null, v: v));
+            return new PostContent(id, content, false, null, v: v);
         }
-        private void ShowHelp(PostManager postManager, string from, long id, Visibility v)
+        private PostContent ShowHelp(string from, long id, Visibility v)
         {
             var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードはお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
                 $"使い方  (at)はアットマーク\n\n" +
@@ -101,7 +98,7 @@ namespace ImasNotification
                 $"お仕事コードはlistコマンドで調べられます。詳しくは\n" +
                 $"(at)info list help\n" +
                 $"と投稿してください。";
-            postManager.Col.Add(new PostContent(id, content, true, "remindコマンドのヘルプ\n", v: v));
+            return new PostContent(id, content, true, "remindコマンドのヘルプ\n", v: v);
         }
     }
 }
