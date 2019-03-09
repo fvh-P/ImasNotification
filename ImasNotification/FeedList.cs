@@ -84,12 +84,13 @@ namespace ImasNotification
 
         public PostContent ShowHelp(string from, long id, Visibility v)
         {
-            var content = $"feedコマンド アイマスニュースとアイマス公式ブログの更新情報をDMでお知らせします。\n" +
-                    $"使い方  (at)はアットマーク\n\n" +
-                    $"(at)info feed add\n" +
-                    $"  購読します。以降更新情報があるとDMで送られてきます。\n\n" +
-                    $"(at)info feed remove\n" +
-                    $"  購読を解除します\n";
+            var content = $"@{from} feedコマンド\n" +
+                $"アイマスニュースとアイマス公式ブログの更新情報をDMでお知らせします。\n" +
+                $"使い方  (at)はアットマーク\n\n" +
+                $"(at)info feed add\n" +
+                $"  購読します。以降更新情報があるとDMで送られてきます。\n\n" +
+                $"(at)info feed remove\n" +
+                $"  購読を解除します\n";
             return new PostContent(id, content, true, "feedコマンドのヘルプ\n", v: v);
         }
     }

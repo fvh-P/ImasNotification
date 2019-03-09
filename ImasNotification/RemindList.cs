@@ -89,7 +89,8 @@ namespace ImasNotification
         }
         private PostContent ShowHelp(string from, long id, Visibility v)
         {
-            var content = $"@{from} お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードはお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
+            var content = $"@{from} remindコマンド\n" +
+                $"お仕事コードを登録するとそのお仕事の開始約10分前にリプライでお知らせします。お仕事コードはお仕事のうち開始時間の設定があるものに付与されています。\n\n" +
                 $"使い方  (at)はアットマーク\n\n" +
                 $"(at)info remind add xxxxxx\n" +
                 $"  お仕事コードxxxxxxのお仕事を通知登録します。\n\n" +
