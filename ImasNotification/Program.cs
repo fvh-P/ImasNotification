@@ -61,6 +61,7 @@ namespace ImasNotification
                         postManager.Col.Remove(x);
                         Console.WriteLine(x.Content);
                         postManager.Client.PostStatus(x.Content, x.Visibility, replyStatusId: x.Id, sensitive: x.Sensitive, spoilerText: x.Spoiler);
+                        Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
                     }
                     Debug.WriteLine(item.First().Content);
                 }
@@ -122,8 +123,9 @@ namespace ImasNotification
                     var from = e.Notification.Account.AccountName;
                     var id = e.Notification.Status.Id;
                     var account = e.Notification.Status.Account.Id;
-                    Debug.WriteLine($"{from}: {e.Notification.Status.Content}");
-                    var toot = HtmlParse(e.Notification.Status.Content).Replace($"@{my}", "").TrimStart();
+                    var parsed = HtmlParse(e.Notification.Status.Content);
+                    Console.WriteLine($"{from}: {parsed}");
+                    var toot = Regex.Replace(parsed, @"^(\s)*@info(@imastodon.net)?(\s)*", "");
 
                     if (from != my & toot != "")
                     {
@@ -157,7 +159,6 @@ namespace ImasNotification
                                 postManager.Col.Add(new PostContent(id, content, true, "infoのコマンドヘルプ\n"));
                                 break;
                             case "admin":
-                                
                                 if (account == 35)
                                 {
                                     AdminCommand.AdminCommander(postManager, from, id, v, token);
